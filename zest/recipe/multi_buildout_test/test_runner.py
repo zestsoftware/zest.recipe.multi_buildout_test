@@ -1,7 +1,10 @@
 import os
+import sys
 import subprocess
 import logging
 import zc.buildout
+
+from zest.recipe.mk_buildout.mk_buildout import MakeBuildout
 
 class CreateRunner(object):
     _base_options = {'runner_name': 'test_all'}
@@ -36,19 +39,16 @@ class CreateRunner(object):
         parts = []
         for part_id in self.buildout.keys():
             if not getattr(self.buildout[part_id], 'recipe', None):
-                # No recipe, let's sip that.
+                # No recipe, let's skip that.
                 continue
 
-            if self.buildout[part_id].recipe.__class__.__name__ == 'MakeBuildout':
-                # XXX - That's really ugly, but I can't import zest.recipe.mk_buildout ....
-                # I'll see after the first zest.recipe.mk_buildout release if it solves the problem,
-                # currently it's only developped locally.
+            if isinstance(self.buildout[part_id].recipe, MakeBuildout):
                 parts.append(part_id)
 
         exe = open(os.sep.join(['bin', self.options['runner_name']]),
                    'w')
 
-        exe.write('\n'.join(['#!/usr/bin/python',
+        exe.write('\n'.join(['#!%s' % sys.executable,
                              'import os',
                              'import subprocess',
                              'import sys'
