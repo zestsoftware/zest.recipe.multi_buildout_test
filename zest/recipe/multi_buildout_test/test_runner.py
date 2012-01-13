@@ -37,9 +37,14 @@ class CreateRunner(object):
 
     def install(self):
         parts = []
+        buildout_parts = self.buildout['buildout']['parts'].split('\n')
+
         for part_id in self.buildout.keys():
             if not getattr(self.buildout[part_id], 'recipe', None):
                 # No recipe, let's skip that.
+                continue
+
+            if not part_id in buildout_parts:
                 continue
 
             if isinstance(self.buildout[part_id].recipe, MakeBuildout):
